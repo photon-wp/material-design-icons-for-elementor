@@ -35,12 +35,17 @@ if ( ! class_exists( 'MD_Icons_Shortcodes' ) ) {
 			$atts = shortcode_atts( array(
 				'style' => '',
 				'icon'  => '',
+				'size'  => '',
 			), $atts, 'md_icon' );
 
 			$result = '';
 
 			if ( empty( $atts['style'] ) || empty( $atts['icon'] ) ) {
 				return $result;
+			}
+
+			if ( empty( $atts['size'] ) ) {
+				$atts['size'] = '50px';
 			}
 
 			$config = md_icons()->integration->get_icons_config( $atts['style'] );
@@ -50,19 +55,16 @@ if ( ! class_exists( 'MD_Icons_Shortcodes' ) ) {
 			}
 
 			$result = sprintf(
-				'<div class="md-icon-wrap"><i class="%1$s %2$s" data-md-icon="%3$s"></i></div>',
+				'<i class="%1$s %2$s" data-md-icon="%3$s" style="font-size:%4$s"></i>',
 				$config['displayPrefix'],
 				$atts['icon'],
-				str_replace( 'md-', '', $atts['icon']  )
+				str_replace( 'md-', '', $atts['icon']  ),
+        $atts['size']
 			);
 
 			$result = wp_kses_post( $result );
 
 			static $added_styles = false;
-
-			if ( ! $added_styles ) {
-				add_action( 'wp_footer', array( $this, 'print_shortcode_styles' ) );
-			}
 
 			// Dequeue dependency styles.
 			$config['enqueue'] = array();
@@ -70,19 +72,6 @@ if ( ! class_exists( 'MD_Icons_Shortcodes' ) ) {
 			$this->enqueue_icon_assets( $config );
 
 			return $result;
-		}
-
-		public function print_shortcode_styles() {
-			?>
-			<style type="text/css">
-				.md-icon-wrap {
-					display: inline-flex;
-					font-size: 50px;
-					line-height: 1;
-					text-align: center;
-				}
-			</style>
-			<?php
 		}
 
 		/**
